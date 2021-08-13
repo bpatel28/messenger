@@ -11,7 +11,7 @@ export const addMessageToStore = (state, payload) => {
     return [newConvo, ...state];
   }
 
-  return state.map((convo) => {
+  const stateCopy = state.map((convo) => {
     if (convo.id === message.conversationId) {
       const convoCopy = { ...convo };
       convoCopy.messages.push(message);
@@ -21,6 +21,17 @@ export const addMessageToStore = (state, payload) => {
       return convo;
     }
   });
+
+  const convoIndex = state
+    .map((convo) => convo.id)
+    .indexOf(message.conversationId);
+  if (convoIndex !== 0 && convoIndex !== -1) {
+    const latestConvo = stateCopy[convoIndex];
+    stateCopy.splice(convoIndex, 1);
+    return [latestConvo, ...stateCopy];
+  } else {
+    return stateCopy;
+  }
 };
 
 export const addOnlineUserToStore = (state, id) => {
