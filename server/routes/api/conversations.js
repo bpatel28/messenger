@@ -84,7 +84,7 @@ router.get("/", async (req, res, next) => {
         const lastReadJSON = convoLastRead.toJSON();
         convoJSON.lastRead = lastReadJSON.lastRead;
       } else {
-        convoJSON.lastRead = new Date().toISOString();
+        convoJSON.lastRead = '1';
       }
 
       convoJSON.messages.reverse();

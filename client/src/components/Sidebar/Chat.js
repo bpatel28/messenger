@@ -15,9 +15,9 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     "&:hover": {
-      cursor: "grab"
-    }
-  }
+      cursor: "grab",
+    },
+  },
 }));
 
 const Chat = (props) => {
@@ -27,8 +27,10 @@ const Chat = (props) => {
 
   const handleClick = async (conversation) => {
     await props.setActiveChat(conversation.otherUser.username);
-    const body = {conversationId : conversation.id}
-    await props.updateConversationLastRead(body);
+    if (conversation && conversation.id) {
+      const body = { conversationId: conversation.id };
+      await props.updateConversationLastRead(body);
+    }
   };
 
   return (
@@ -51,7 +53,7 @@ const mapDispatchToProps = (dispatch) => {
     },
     updateConversationLastRead: (body) => {
       dispatch(updateConversationLastRead(body));
-    }
+    },
   };
 };
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography, Chip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -18,6 +18,17 @@ const useStyles = makeStyles((theme) => ({
     color: "#9CADC8",
     letterSpacing: -0.17,
   },
+  previewDarkText : {
+    fontWeight: "bold",
+    fontSize: 12,
+    color: "#000000",
+    letterSpacing: -0.17,
+  },
+  chip: {
+    maarginTop: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    padding: theme.spacing(0)
+  },
 }));
 
 const ChatContent = (props) => {
@@ -25,8 +36,7 @@ const ChatContent = (props) => {
 
   const { conversation } = props;
   const { latestMessageText, otherUser } = conversation;
-  const unreadCount = countUnreadMessages(conversation);
-  const unreadMessage = unreadCount || "";
+  const unreadCount = countUnreadMessages(conversation) || "";
 
   return (
     <Box className={classes.root}>
@@ -34,17 +44,21 @@ const ChatContent = (props) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
+        <Typography className={unreadCount ? classes.previewDarkText : classes.previewText}>
           {latestMessageText}
         </Typography>
-        <span>{unreadMessage}</span>
       </Box>
+      {unreadCount ? (
+        <Chip size="small" className={classes.chip} label={unreadCount} color="primary" />
+      ) : (
+        ""
+      )}
     </Box>
   );
 };
 
 const countUnreadMessages = (conversation) => {
-  const { messages, lastRead, otherUser } = conversation;
+  const { messages, lastRead = '1', otherUser } = conversation;
   const unreadMessages = messages.filter(
     (message) =>
       Date.parse(message.updatedAt) > Date.parse(lastRead) &&

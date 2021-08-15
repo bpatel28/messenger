@@ -48,7 +48,7 @@ router.post("/", async (req, res, next) => {
     });
 
     const convoLastRead = await ConversationLastRead.updateInsert(
-      conversationId,
+      conversation.id,
       senderId
     );
 
