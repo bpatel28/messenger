@@ -1,5 +1,10 @@
 const router = require("express").Router();
-const { User, Conversation, Message } = require("../../db/models");
+const {
+  User,
+  Conversation,
+  Message,
+  ConversationLastRead,
+} = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
@@ -69,11 +74,44 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
+
+      // pull last read info.
+      const convoLastRead = await ConversationLastRead.findLastRead(
+        convoJSON.id,
+        userId
+      );
+      if (convoLastRead) {
+        const lastReadJSON = convoLastRead.toJSON();
+        convoJSON.lastRead = lastReadJSON.lastRead;
+      } else {
+        convoJSON.lastRead = new Date().toISOString();
+      }
+
       convoJSON.messages.reverse();
       conversations[i] = convoJSON;
     }
 
     res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/read", async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    const userId = req.user.id;
+    const { conversationId } = req.body;
+
+    const convoLastRead = await ConversationLastRead.updateInsert(
+      conversationId,
+      userId
+    );
+
+    res.json(convoLastRead);
   } catch (error) {
     next(error);
   }

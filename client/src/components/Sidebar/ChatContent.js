@@ -25,6 +25,8 @@ const ChatContent = (props) => {
 
   const { conversation } = props;
   const { latestMessageText, otherUser } = conversation;
+  const unreadCount = countUnreadMessages(conversation);
+  const unreadMessage = unreadCount || "";
 
   return (
     <Box className={classes.root}>
@@ -35,9 +37,20 @@ const ChatContent = (props) => {
         <Typography className={classes.previewText}>
           {latestMessageText}
         </Typography>
+        <span>{unreadMessage}</span>
       </Box>
     </Box>
   );
+};
+
+const countUnreadMessages = (conversation) => {
+  const { messages, lastRead, otherUser } = conversation;
+  const unreadMessages = messages.filter(
+    (message) =>
+      Date.parse(message.updatedAt) > Date.parse(lastRead) &&
+      message.senderId === otherUser.id
+  );
+  return unreadMessages.length;
 };
 
 export default ChatContent;
