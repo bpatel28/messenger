@@ -28,6 +28,7 @@ const Input = (props) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!event.target.text.value) return;
     // add sender user info if posting to a brand new convo, so that the other user will have access to username, profile pic, etc.
     const reqBody = {
       text: event.target.text.value,
