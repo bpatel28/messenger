@@ -121,9 +121,14 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
 
 export const updateConversationMyLastRead = (body) => async (dispatch) => {
   try {
-    const { data } = await axios.post("/api/conversations/read", body);
-    dispatch(updateMyLastRead(data.conversationId, data.lastRead));
-    socket.emit("message-read", { conversationId: data.conversationId, otherUserLastRead :  data.lastRead});
+    const { data } = await axios.post("/api/conversations/read", body); //  update database first.
+    dispatch(updateMyLastRead(data.conversationId, data.lastRead)); // update my last read
+
+    // emit message-read to notify other user.
+    socket.emit("message-read", {
+      conversationId: data.conversationId,
+      otherUserLastRead: data.lastRead,
+    });
   } catch (error) {
     console.error(error);
   }

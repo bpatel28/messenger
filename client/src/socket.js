@@ -23,7 +23,10 @@ socket.on("connect", () => {
     store.dispatch(setNewMessage(data.message, data.sender));
   });
   socket.on("message-read", (data) => {
-    store.dispatch(updateOtherUserLastRead(data.conversationId, data.otherUserLastRead));
+    // other user read our message.
+    store.dispatch(
+      updateOtherUserLastRead(data.conversationId, data.otherUserLastRead)
+    );
   });
 });
 

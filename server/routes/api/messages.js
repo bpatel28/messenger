@@ -17,13 +17,16 @@ router.post("/", async (req, res, next) => {
 
     // if we already know conversation id, we can save time and just add it to message and return
     if (conversationId) {
-      const message = await Message.create({ senderId, text, conversationId });
-      const convoMyLastRead = await ConversationLastRead.updateInsert(
-        conversationId,
-        senderId
-      );
+      const [message, convoMyLastRead] = await Promise.all([
+        Message.create({ senderId, text, conversationId }),
+        ConversationLastRead.updateInsert(conversationId, senderId),
+      ]);
 
-      return res.json({ message, sender, myLastRead: convoMyLastRead.lastRead });
+      return res.json({
+        message,
+        sender,
+        myLastRead: convoMyLastRead.lastRead,
+      });
     }
     // if we don't have conversation id, find a conversation to make sure it doesn't already exist
     let conversation = await Conversation.findConversation(
@@ -41,16 +44,15 @@ router.post("/", async (req, res, next) => {
         sender.online = true;
       }
     }
-    const message = await Message.create({
-      senderId,
-      text,
-      conversationId: conversation.id,
-    });
 
-    const convoMyLastRead = await ConversationLastRead.updateInsert(
-      conversation.id,
-      senderId
-    );
+    const [message, convoMyLastRead] = await Promise.all([
+      Message.create({
+        senderId,
+        text,
+        conversationId: conversation.id,
+      }),
+      ConversationLastRead.updateInsert(conversation.id, senderId),
+    ]);
 
     res.json({ message, sender, myLastRead: convoMyLastRead.lastRead });
   } catch (error) {

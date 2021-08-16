@@ -76,26 +76,24 @@ router.get("/", async (req, res, next) => {
       convoJSON.latestMessageText = convoJSON.messages[0].text;
 
       // pull last read info for currentUser.
-      const otherUserLastRead = await ConversationLastRead.findLastRead(
-        convoJSON.id,
-        convoJSON.otherUser.id
-      );
+      // pull last read info for other user.
+      const [otherUserLastRead, myLastRead] = await Promise.all([
+        ConversationLastRead.findLastRead(convoJSON.id, convoJSON.otherUser.id),
+        ConversationLastRead.findLastRead(convoJSON.id, userId),
+      ]);
+
+      // add result to conversation.
       if (otherUserLastRead) {
         const otherUserLastReadJSON = otherUserLastRead.toJSON();
         convoJSON.otherUserLastRead = otherUserLastReadJSON.lastRead;
       } else {
-        convoJSON.otherUserLastRead = '1';
+        convoJSON.otherUserLastRead = "1";
       }
-
-      const myLastRead = await ConversationLastRead.findLastRead(
-        convoJSON.id,
-        userId
-      );
       if (myLastRead) {
         const myLastReadJSON = myLastRead.toJSON();
         convoJSON.myLastRead = myLastReadJSON.lastRead;
       } else {
-        convoJSON.myLastRead = '1';
+        convoJSON.myLastRead = "1";
       }
 
       convoJSON.messages.reverse();
@@ -117,6 +115,7 @@ router.post("/read", async (req, res, next) => {
     const userId = req.user.id;
     const { conversationId } = req.body;
 
+    // updating read receipt for sender.
     const convoLastRead = await ConversationLastRead.updateInsert(
       conversationId,
       userId

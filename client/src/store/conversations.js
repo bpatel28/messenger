@@ -5,7 +5,7 @@ import {
   removeOfflineUserFromStore,
   addMessageToStore,
   updateMyLastReadToStore,
-  otherUserLastReadToStore
+  updateOtherUserLastReadToStore,
 } from "./utils/reducerFunctions";
 
 // ACTIONS
@@ -116,7 +116,7 @@ const reducer = (state = [], action) => {
         action.payload.myLastRead
       );
     case UPDATE_OTHER_USER_LAST_READ:
-      return otherUserLastReadToStore(
+      return updateOtherUserLastReadToStore(
         state,
         action.payload.conversationId,
         action.payload.otherUserLastRead

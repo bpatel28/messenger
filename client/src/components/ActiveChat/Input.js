@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { FormControl, FilledInput } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
-import { postMessage } from "../../store/utils/thunkCreators";
-import { updateMyLastRead } from "../../store/conversations";
+import {
+  postMessage,
+  updateConversationMyLastRead,
+} from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -21,8 +23,13 @@ const useStyles = makeStyles(() => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, conversationId, user, updateMyLastRead } =
-    props;
+  const {
+    postMessage,
+    otherUser,
+    conversationId,
+    user,
+    updateConversationMyLastRead,
+  } = props;
 
   const handleChange = (event) => {
     setText(event.target.value);
@@ -31,6 +38,7 @@ const Input = (props) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!event.target.text.value) return;
+
     // add sender user info if posting to a brand new convo, so that the other user will have access to username, profile pic, etc.
     const reqBody = {
       text: event.target.text.value,
@@ -39,7 +47,12 @@ const Input = (props) => {
       sender: conversationId ? null : user,
     };
     await postMessage(reqBody);
-    await updateMyLastRead(conversationId, new Date().toISOString());
+
+    // on sending new message update last read status.
+    if (conversationId) {
+      const body = { conversationId };
+      await updateConversationMyLastRead(body);
+    }
     setText("");
   };
 
@@ -64,8 +77,8 @@ const mapDispatchToProps = (dispatch) => {
     postMessage: (message) => {
       dispatch(postMessage(message));
     },
-    updateMyLastRead: (conversationId, lastRead) => {
-      dispatch(updateMyLastRead(conversationId, lastRead));
+    updateConversationMyLastRead: (conversationId, lastRead) => {
+      dispatch(updateConversationMyLastRead(conversationId, lastRead));
     },
   };
 };
