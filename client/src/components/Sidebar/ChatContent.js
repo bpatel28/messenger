@@ -58,10 +58,10 @@ const ChatContent = (props) => {
 };
 
 const countUnreadMessages = (conversation) => {
-  const { messages, lastRead = '1', otherUser } = conversation;
+  const { messages, myLastRead = '1', otherUser } = conversation;
   const unreadMessages = messages.filter(
     (message) =>
-      Date.parse(message.updatedAt) > Date.parse(lastRead) &&
+      Date.parse(message.updatedAt) > Date.parse(myLastRead) &&
       message.senderId === otherUser.id
   );
   return unreadMessages.length;

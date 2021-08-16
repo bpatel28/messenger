@@ -5,7 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
-  updateLastRead,
+  updateMyLastRead,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -119,10 +119,11 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   }
 };
 
-export const updateConversationLastRead = (body) => async (dispatch) => {
+export const updateConversationMyLastRead = (body) => async (dispatch) => {
   try {
     const { data } = await axios.post("/api/conversations/read", body);
-    dispatch(updateLastRead(data.conversationId, data.lastRead));
+    dispatch(updateMyLastRead(data.conversationId, data.lastRead));
+    socket.emit("message-read", { conversationId: data.conversationId, otherUserLastRead :  data.lastRead});
   } catch (error) {
     console.error(error);
   }

@@ -3,7 +3,7 @@ import { FormControl, FilledInput } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { postMessage } from "../../store/utils/thunkCreators";
-import { updateLastRead } from "../../store/conversations";
+import { updateMyLastRead } from "../../store/conversations";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -21,7 +21,7 @@ const useStyles = makeStyles(() => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, conversationId, user, updateLastRead } =
+  const { postMessage, otherUser, conversationId, user, updateMyLastRead } =
     props;
 
   const handleChange = (event) => {
@@ -39,7 +39,7 @@ const Input = (props) => {
       sender: conversationId ? null : user,
     };
     await postMessage(reqBody);
-    await updateLastRead(conversationId, new Date().toISOString());
+    await updateMyLastRead(conversationId, new Date().toISOString());
     setText("");
   };
 
@@ -64,8 +64,8 @@ const mapDispatchToProps = (dispatch) => {
     postMessage: (message) => {
       dispatch(postMessage(message));
     },
-    updateLastRead: (conversationId, lastRead) => {
-      dispatch(updateLastRead(conversationId, lastRead));
+    updateMyLastRead: (conversationId, lastRead) => {
+      dispatch(updateMyLastRead(conversationId, lastRead));
     },
   };
 };

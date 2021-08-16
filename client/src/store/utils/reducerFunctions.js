@@ -8,7 +8,8 @@ export const addMessageToStore = (state, payload) => {
       messages: [message],
     };
     newConvo.latestMessageText = message.text;
-    newConvo.lastRead = '1';
+    newConvo.myLastRead = '1';
+    newConvo.otherUserLastRead = '1';
     return [newConvo, ...state];
   }
 
@@ -92,14 +93,26 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const updateLastReadToStore = (state, conversationId, lastRead) => {
+export const updateMyLastReadToStore = (state, conversationId, myLastRead) => {
   return state.map((convo) => {
     if (convo.id === conversationId) {
       const convoCopy = {...convo};
-      convoCopy.lastRead = lastRead;
+      convoCopy.myLastRead = myLastRead;
       return convoCopy;
     } else {
       return convo;
     }
   });
 }
+
+export const otherUserLastReadToStore = (state, conversationId, otherUserLastRead) => {
+  return state.map((convo) => {
+    if (convo.id === conversationId) {
+      const convoCopy = {...convo};
+      convoCopy.otherUserLastRead = otherUserLastRead;
+      return convoCopy;
+    } else {
+      return convo;
+    }
+  });
+};

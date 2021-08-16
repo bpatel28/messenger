@@ -75,16 +75,27 @@ router.get("/", async (req, res, next) => {
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
 
-      // pull last read info.
-      const convoLastRead = await ConversationLastRead.findLastRead(
+      // pull last read info for currentUser.
+      const otherUserLastRead = await ConversationLastRead.findLastRead(
+        convoJSON.id,
+        convoJSON.otherUser.id
+      );
+      if (otherUserLastRead) {
+        const otherUserLastReadJSON = otherUserLastRead.toJSON();
+        convoJSON.otherUserLastRead = otherUserLastReadJSON.lastRead;
+      } else {
+        convoJSON.otherUserLastRead = '1';
+      }
+
+      const myLastRead = await ConversationLastRead.findLastRead(
         convoJSON.id,
         userId
       );
-      if (convoLastRead) {
-        const lastReadJSON = convoLastRead.toJSON();
-        convoJSON.lastRead = lastReadJSON.lastRead;
+      if (myLastRead) {
+        const myLastReadJSON = myLastRead.toJSON();
+        convoJSON.myLastRead = myLastReadJSON.lastRead;
       } else {
-        convoJSON.lastRead = '1';
+        convoJSON.myLastRead = '1';
       }
 
       convoJSON.messages.reverse();

@@ -4,7 +4,8 @@ import {
   addSearchedUsersToStore,
   removeOfflineUserFromStore,
   addMessageToStore,
-  updateLastReadToStore,
+  updateMyLastReadToStore,
+  otherUserLastReadToStore
 } from "./utils/reducerFunctions";
 
 // ACTIONS
@@ -16,7 +17,8 @@ const REMOVE_OFFLINE_USER = "REMOVE_OFFLINE_USER";
 const SET_SEARCHED_USERS = "SET_SEARCHED_USERS";
 const CLEAR_SEARCHED_USERS = "CLEAR_SEARCHED_USERS";
 const ADD_CONVERSATION = "ADD_CONVERSATION";
-const UPDATE_LAST_READ = "UPDATE_LAST_READ";
+const UPDATE_MY_LAST_READ = "UPDATE_MY_LAST_READ";
+const UPDATE_OTHER_USER_LAST_READ = "OTHER_USER_LAST_READ";
 
 // ACTION CREATORS
 
@@ -69,10 +71,17 @@ export const addConversation = (recipientId, newMessage) => {
   };
 };
 
-export const updateLastRead = (conversationId, lastRead) => {
+export const updateMyLastRead = (conversationId, myLastRead) => {
   return {
-    type: UPDATE_LAST_READ,
-    payload: { conversationId, lastRead },
+    type: UPDATE_MY_LAST_READ,
+    payload: { conversationId, myLastRead },
+  };
+};
+
+export const updateOtherUserLastRead = (conversationId, otherUserLastRead) => {
+  return {
+    type: UPDATE_OTHER_USER_LAST_READ,
+    payload: { conversationId, otherUserLastRead },
   };
 };
 
@@ -100,11 +109,17 @@ const reducer = (state = [], action) => {
         action.payload.recipientId,
         action.payload.newMessage
       );
-    case UPDATE_LAST_READ:
-      return updateLastReadToStore(
+    case UPDATE_MY_LAST_READ:
+      return updateMyLastReadToStore(
         state,
         action.payload.conversationId,
-        action.payload.lastRead
+        action.payload.myLastRead
+      );
+    case UPDATE_OTHER_USER_LAST_READ:
+      return otherUserLastReadToStore(
+        state,
+        action.payload.conversationId,
+        action.payload.otherUserLastRead
       );
     default:
       return state;
