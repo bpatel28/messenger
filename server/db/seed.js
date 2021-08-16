@@ -1,7 +1,8 @@
 const db = require("./db");
-const { User } = require("./models");
+const { User, Group } = require("./models");
 const Conversation = require("./models/conversation");
 const Message = require("./models/message");
+const UserGroup = require("./models/user_group");
 
 async function seed() {
   await db.sync({ force: true });
@@ -114,6 +115,78 @@ async function seed() {
   ]);
 
   console.log(`seeded users and messages`);
+
+  const groupConversations = await Promise.all([
+    Conversation.create({}),
+    Conversation.create({}),
+    Conversation.create({}),
+  ]);
+
+  const groups = await Promise.all(
+    groupConversations.map((convo, index) => {
+      return Group.create({
+        name: `Group ${index + 1}`,
+        conversationId: convo.id,
+      });
+    })
+  );
+
+  const userGroups = await Promise.all([
+    UserGroup.create({
+      groupId: groups[0].id,
+      userId: thomas.id,
+    }),
+    UserGroup.create({
+      groupId: groups[1].id,
+      userId: thomas.id,
+    }),
+    UserGroup.create({
+      groupId: groups[1].id,
+      userId: santiago.id,
+    }),
+    UserGroup.create({
+      groupId: groups[2].id,
+      userId: santiago.id,
+    }),
+    UserGroup.create({
+      groupId: groups[2].id,
+      userId: chiumbo.id,
+    }),
+    UserGroup.create({
+      groupId: groups[0].id,
+      userId: hualing.id,
+    }),
+  ]);
+
+  const groupMessages = await Promise.all([
+    Message.create({
+      conversationId: groupConversations[0].id,
+      senderId: thomas.id,
+      text: "Hii",
+    }),
+    Message.create({
+      conversationId: groupConversations[1].id,
+      senderId: thomas.id,
+      text: "Hello",
+    }),
+    Message.create({
+      conversationId: groupConversations[2].id,
+      senderId: santiago.id,
+      text: "Hey, There",
+    }),
+    Message.create({
+      conversationId: groupConversations[0].id,
+      senderId: hualing.id,
+      text: "How are you?",
+    }),
+    Message.create({
+      conversationId: groupConversations[1].id,
+      senderId: thomas.id,
+      text: "Hey",
+    }),
+  ]);
+
+  console.log(`seeded groups`);
 }
 
 async function runSeed() {
