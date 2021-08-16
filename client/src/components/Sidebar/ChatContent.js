@@ -84,7 +84,7 @@ const ChatContent = (props) => {
       <Chip
         size="small"
         className={chipStyle}
-        label={unreadCount}
+        label={unreadCount < 99 ? unreadCount : "99+"}
         color="primary"
       />
     </Box>
