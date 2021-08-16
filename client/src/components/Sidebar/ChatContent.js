@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     maarginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     padding: theme.spacing(0),
-    display: "inline",
+    display: "flex",
   },
   hiddenChip: {
     maarginTop: theme.spacing(1),

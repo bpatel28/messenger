@@ -77,8 +77,8 @@ const mapDispatchToProps = (dispatch) => {
     postMessage: (message) => {
       dispatch(postMessage(message));
     },
-    updateConversationMyLastRead: (conversationId, lastRead) => {
-      dispatch(updateConversationMyLastRead(conversationId, lastRead));
+    updateConversationMyLastRead: (body) => {
+      dispatch(updateConversationMyLastRead(body));
     },
   };
 };

@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+import { updateConversationMyLastRead } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -25,8 +26,17 @@ const ActiveChat = (props) => {
   const { user } = props;
   const conversation = props.conversation || {};
 
+  const handleOnClick = async (event) => {
+    event.preventDefault();
+    // on sending new message update last read status.
+    if (conversation && conversation.id) {
+      const body = { conversationId : conversation.id };
+      await props.updateConversationMyLastRead(body);
+    }
+  };
+
   return (
-    <Box className={classes.root}>
+    <Box className={classes.root} onClick={handleOnClick}>
       {conversation.otherUser && (
         <>
           <Header
@@ -64,4 +74,13 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ActiveChat);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateConversationMyLastRead: (body) => {
+      dispatch(updateConversationMyLastRead(body));
+    },
+  };
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);
