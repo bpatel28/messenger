@@ -123,7 +123,7 @@ export const sendReadReceipt = (body) => async (dispatch) => {
   try {
     const { conversationId, senderId } = body;
     const { data } = await axios.patch(`/api/conversations/read/${senderId}`); //  update database first.
-    dispatch(resetNotification(conversationId)); // update my last read
+    dispatch(resetNotification(conversationId)); // reset notification for current user.
 
     // emit message-read to notify other user.
     socket.emit("message-read", {
