@@ -95,10 +95,10 @@ const findLastReadMessage = (messages, userId) => {
   });
 };
 
-const countUnreadMessage = (message, userId) => {
+const countUnreadMessage = (messages, userId) => {
   return new Promise((resolve) =>
     resolve(
-      message.reduce((count, message) => {
+      messages.reduce((count, message) => {
         if (message.senderId === userId && !message.readStatus) {
           count += 1;
         }
