@@ -69,11 +69,73 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
+      const [lastReadMessage, myUnreadMessageCount] = await Promise.all([
+        findLastReadMessage(convoJSON.messages, userId),
+        countUnreadMessage(convoJSON.messages, convoJSON.otherUser.id),
+      ]);
+      convoJSON.otherUser.lastReadMessage = lastReadMessage;
+      convoJSON.myUnreadMessageCount = myUnreadMessageCount;
+
       convoJSON.messages.reverse();
       conversations[i] = convoJSON;
     }
 
     res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+const findLastReadMessage = (messages, userId) => {
+  return new Promise((resolve) => {
+    const readMessages = messages.filter(
+      (message) => message.readStatus && message.senderId === userId
+    );
+    resolve(readMessages.length > 0 ? readMessages[0] : null);
+  });
+};
+
+const countUnreadMessage = (message, userId) => {
+  return new Promise((resolve) =>
+    resolve(
+      message.reduce((count, message) => {
+        if (message.senderId === userId && !message.readStatus) {
+          count += 1;
+        }
+        return count;
+      }, 0)
+    )
+  );
+};
+
+router.patch("/read/:senderId", async (req, res, next) => {
+  try {
+    const senderId = req.params.senderId;
+    const receiverId = req.user.id; // who made this request.
+
+    // check if conversation exists for sender and receiver.
+    const conversation = await Conversation.findConversation(
+      senderId,
+      receiverId
+    );
+
+    if (!conversation) throw Error("Invalid Request!");
+
+    const messages = await Message.update(
+      {
+        readStatus: true,
+      },
+      {
+        where: {
+          senderId: senderId,
+          conversationId: conversation.id,
+          readStatus: false,
+        },
+        returning: true,
+      }
+    );
+
+    res.json({ messages: messages[1] ?? [] });
   } catch (error) {
     next(error);
   }
