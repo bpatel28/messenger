@@ -3,13 +3,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
-import { updateConversationMyLastRead } from "../../store/utils/thunkCreators";
+import { sendReadReceipt } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
     display: "flex",
     flexGrow: 8,
-    flexDirection: "column"
+    flexDirection: "column",
   },
   chatContainer: {
     marginLeft: 41,
@@ -17,8 +17,8 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    justifyContent: "space-between"
-  }
+    justifyContent: "space-between",
+  },
 }));
 
 const ActiveChat = (props) => {
@@ -26,35 +26,35 @@ const ActiveChat = (props) => {
   const { user } = props;
   const conversation = props.conversation || {};
 
-  const handleOnClick = async (event) => {
-    event.preventDefault();
-    // on sending new message update last read status.
-    if (conversation && conversation.id) {
-      const body = { conversationId : conversation.id };
-      await props.updateConversationMyLastRead(body);
+  const handleMessageRead = async () => {
+    if (conversation?.id && conversation?.myUnreadMessageCount) {
+      const body = {
+        conversationId: conversation.id,
+        senderId: conversation.otherUser.id,
+      };
+      await props.sendReadReceipt(body);
     }
   };
 
   return (
-    <Box className={classes.root} onClick={handleOnClick}>
+    <Box className={classes.root}>
       {conversation.otherUser && (
         <>
           <Header
             username={conversation.otherUser.username}
             online={conversation.otherUser.online || false}
           />
-          <Box className={classes.chatContainer}>
+          <Box className={classes.chatContainer} onClick={handleMessageRead}>
             <Messages
               messages={conversation.messages}
               otherUser={conversation.otherUser}
-              myLastRead={conversation.myLastRead}
-              otherUserLastRead={conversation.otherUserLastRead}
               userId={user.id}
             />
             <Input
               otherUser={conversation.otherUser}
               conversationId={conversation.id}
               user={user}
+              myUnreadMessageCount={conversation.myUnreadMessageCount}
             />
           </Box>
         </>
@@ -69,18 +69,18 @@ const mapStateToProps = (state) => {
     conversation:
       state.conversations &&
       state.conversations.find(
-        (conversation) => conversation.otherUser.username === state.activeConversation
-      )
+        (conversation) =>
+          conversation.otherUser.username === state.activeConversation
+      ),
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    updateConversationMyLastRead: (body) => {
-      dispatch(updateConversationMyLastRead(body));
+    sendReadReceipt: (id) => {
+      dispatch(sendReadReceipt(id));
     },
   };
 };
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);

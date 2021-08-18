@@ -8,8 +8,7 @@ export const addMessageToStore = (state, payload) => {
       messages: [message],
     };
     newConvo.latestMessageText = message.text;
-    newConvo.myLastRead = "1";
-    newConvo.otherUserLastRead = "1";
+    if (!newConvo.myUnreadMessageCount) newConvo.myUnreadMessageCount = 1;
     return [newConvo, ...state];
   }
 
@@ -20,6 +19,9 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...convo };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
+      if (!convoCopy.myUnreadMessageCount) convoCopy.myUnreadMessageCount = 0;
+      if (message.senderId === convoCopy.otherUser.id)
+        convoCopy.myUnreadMessageCount += 1;
       return convoCopy;
     } else {
       return convo;
@@ -93,11 +95,17 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const updateMyLastReadToStore = (state, conversationId, myLastRead) => {
+export const updateMessagesReadStatusToStore = (
+  state,
+  conversationId,
+  updatedMessages
+) => {
   return state.map((convo) => {
     if (convo.id === conversationId) {
       const convoCopy = { ...convo };
-      convoCopy.myLastRead = myLastRead;
+      convoCopy.messages.forEach((message) => (message.readStatus = true));
+      convoCopy.otherUser.lastReadMessage =
+        convoCopy.messages[convoCopy.messages.length - 1];
       return convoCopy;
     } else {
       return convo;
@@ -105,15 +113,15 @@ export const updateMyLastReadToStore = (state, conversationId, myLastRead) => {
   });
 };
 
-export const updateOtherUserLastReadToStore = (
+export const resetNotificationToStore = (
   state,
-  conversationId,
-  otherUserLastRead
+  conversationId
 ) => {
   return state.map((convo) => {
     if (convo.id === conversationId) {
       const convoCopy = { ...convo };
-      convoCopy.otherUserLastRead = otherUserLastRead;
+      convoCopy.myUnreadMessageCount = 0;
+      convoCopy.messages.forEach((message) => (message.readStatus = true));
       return convoCopy;
     } else {
       return convo;

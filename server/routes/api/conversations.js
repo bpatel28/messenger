@@ -1,10 +1,5 @@
 const router = require("express").Router();
-const {
-  User,
-  Conversation,
-  Message,
-  ConversationLastRead,
-} = require("../../db/models");
+const { User, Conversation, Message } = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
@@ -74,27 +69,12 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
-
-      // pull last read info for currentUser.
-      // pull last read info for other user.
-      const [otherUserLastRead, myLastRead] = await Promise.all([
-        ConversationLastRead.findLastRead(convoJSON.id, convoJSON.otherUser.id),
-        ConversationLastRead.findLastRead(convoJSON.id, userId),
+      const [lastReadMessage, myUnreadMessageCount] = await Promise.all([
+        findLastReadMessage(convoJSON.messages, userId),
+        countUnreadMessage(convoJSON.messages, convoJSON.otherUser.id),
       ]);
-
-      // add result to conversation.
-      if (otherUserLastRead) {
-        const otherUserLastReadJSON = otherUserLastRead.toJSON();
-        convoJSON.otherUserLastRead = otherUserLastReadJSON.lastRead;
-      } else {
-        convoJSON.otherUserLastRead = "1";
-      }
-      if (myLastRead) {
-        const myLastReadJSON = myLastRead.toJSON();
-        convoJSON.myLastRead = myLastReadJSON.lastRead;
-      } else {
-        convoJSON.myLastRead = "1";
-      }
+      convoJSON.otherUser.lastReadMessage = lastReadMessage;
+      convoJSON.myUnreadMessageCount = myUnreadMessageCount;
 
       convoJSON.messages.reverse();
       conversations[i] = convoJSON;
@@ -106,22 +86,56 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/read", async (req, res, next) => {
+const findLastReadMessage = (messages, userId) => {
+  return new Promise((resolve) => {
+    const readMessages = messages.filter(
+      (message) => message.readStatus && message.senderId === userId
+    );
+    resolve(readMessages.length > 0 ? readMessages[0] : null);
+  });
+};
+
+const countUnreadMessage = (message, userId) => {
+  return new Promise((resolve) =>
+    resolve(
+      message.reduce((count, message) => {
+        if (message.senderId === userId && !message.readStatus) {
+          count += 1;
+        }
+        return count;
+      }, 0)
+    )
+  );
+};
+
+router.patch("/read/:senderId", async (req, res, next) => {
   try {
-    if (!req.user) {
-      return res.sendStatus(401);
-    }
+    const senderId = req.params.senderId;
+    const receiverId = req.user.id; // who made this request.
 
-    const userId = req.user.id;
-    const { conversationId } = req.body;
-
-    // updating read receipt for sender.
-    const convoLastRead = await ConversationLastRead.updateInsert(
-      conversationId,
-      userId
+    // check if conversation exists for sender and receiver.
+    const conversation = await Conversation.findConversation(
+      senderId,
+      receiverId
     );
 
-    res.json(convoLastRead);
+    if (!conversation) throw Error("Invalid Request!");
+
+    const messages = await Message.update(
+      {
+        readStatus: true,
+      },
+      {
+        where: {
+          senderId: senderId,
+          conversationId: conversation.id,
+          readStatus: false,
+        },
+        returning: true,
+      }
+    );
+
+    res.json({ messages: messages[1] ?? [] });
   } catch (error) {
     next(error);
   }

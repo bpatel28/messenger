@@ -4,8 +4,8 @@ import {
   addSearchedUsersToStore,
   removeOfflineUserFromStore,
   addMessageToStore,
-  updateMyLastReadToStore,
-  updateOtherUserLastReadToStore,
+  updateMessagesReadStatusToStore,
+  resetNotificationToStore,
 } from "./utils/reducerFunctions";
 
 // ACTIONS
@@ -17,8 +17,8 @@ const REMOVE_OFFLINE_USER = "REMOVE_OFFLINE_USER";
 const SET_SEARCHED_USERS = "SET_SEARCHED_USERS";
 const CLEAR_SEARCHED_USERS = "CLEAR_SEARCHED_USERS";
 const ADD_CONVERSATION = "ADD_CONVERSATION";
-const UPDATE_MY_LAST_READ = "UPDATE_MY_LAST_READ";
-const UPDATE_OTHER_USER_LAST_READ = "OTHER_USER_LAST_READ";
+const SET_READ_RECEIPT = "SET_READ_RECEIPT";
+const RESET_NOTIFICATION = "RESET_NOTIFICATION";
 
 // ACTION CREATORS
 
@@ -71,17 +71,17 @@ export const addConversation = (recipientId, newMessage) => {
   };
 };
 
-export const updateMyLastRead = (conversationId, myLastRead) => {
+export const setReadReceipt = (conversationId, updatedMessages) => {
   return {
-    type: UPDATE_MY_LAST_READ,
-    payload: { conversationId, myLastRead },
+    type: SET_READ_RECEIPT,
+    payload: { conversationId, updatedMessages },
   };
 };
 
-export const updateOtherUserLastRead = (conversationId, otherUserLastRead) => {
+export const resetNotification = (conversationId) => {
   return {
-    type: UPDATE_OTHER_USER_LAST_READ,
-    payload: { conversationId, otherUserLastRead },
+    type: RESET_NOTIFICATION,
+    conversationId,
   };
 };
 
@@ -109,18 +109,14 @@ const reducer = (state = [], action) => {
         action.payload.recipientId,
         action.payload.newMessage
       );
-    case UPDATE_MY_LAST_READ:
-      return updateMyLastReadToStore(
+    case SET_READ_RECEIPT:
+      return updateMessagesReadStatusToStore(
         state,
         action.payload.conversationId,
-        action.payload.myLastRead
+        action.payload.updatedMessages
       );
-    case UPDATE_OTHER_USER_LAST_READ:
-      return updateOtherUserLastReadToStore(
-        state,
-        action.payload.conversationId,
-        action.payload.otherUserLastRead
-      );
+    case RESET_NOTIFICATION:
+      return resetNotificationToStore(state, action.conversationId);
     default:
       return state;
   }
