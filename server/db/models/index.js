@@ -15,7 +15,6 @@ Message.belongsTo(Conversation);
 Conversation.hasMany(Message);
 
 Group.belongsTo(Conversation);
-Conversation.hasMany(Group);
 
 UserGroup.belongsTo(Group);
 Group.hasMany(UserGroup);
