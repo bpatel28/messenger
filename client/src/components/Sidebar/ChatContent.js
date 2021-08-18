@@ -15,32 +15,19 @@ const useStyles = makeStyles((theme) => ({
   },
   previewText: {
     fontSize: 12,
-    color: "#9CADC8",
+    color: (props) => props.fontColor,
     letterSpacing: -0.17,
+    fontWeight: (props) => props.fontWeight,
   },
-  previewDarkText: {
-    fontWeight: "bold",
-    fontSize: 12,
-    color: "#000000",
-    letterSpacing: -0.17,
-  },
-  vibleChip: {
+  chipStyle: {
     maarginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     padding: theme.spacing(0),
-    display: "flex",
-  },
-  hiddenChip: {
-    maarginTop: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    padding: theme.spacing(0),
-    display: "none",
+    display: (props) => props.visiblity,
   },
 }));
 
 const ChatContent = (props) => {
-  const classes = useStyles();
-
   const notificationMessage = (msgCount) => {
     if (msgCount > 99) {
       return "99+";
@@ -50,11 +37,18 @@ const ChatContent = (props) => {
       return "";
     }
   };
-
   const { conversation } = props;
   const { latestMessageText, otherUser, myUnreadMessageCount } = conversation;
   const message = notificationMessage(myUnreadMessageCount);
-  const chipStyle = message ? classes.vibleChip : classes.hiddenChip;
+  const styleProps = message
+    ? { visiblity: "flex", fontWeight: 700, fontColor: "#140e00" }
+    : {
+        visiblity: "none",
+        fontWeight: "fontWeightLight",
+        fontColor: "#9CADC8",
+      };
+  const classes = useStyles(styleProps);
+
   return (
     <Box className={classes.root}>
       <Box>
@@ -67,7 +61,7 @@ const ChatContent = (props) => {
       </Box>
       <Chip
         size="small"
-        className={chipStyle}
+        className={classes.chipStyle}
         label={message}
         color="primary"
       />

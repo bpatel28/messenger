@@ -69,6 +69,7 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
+      
       const [lastReadMessage, myUnreadMessageCount] = await Promise.all([
         findLastReadMessage(convoJSON.messages, userId),
         countUnreadMessage(convoJSON.messages, convoJSON.otherUser.id),
