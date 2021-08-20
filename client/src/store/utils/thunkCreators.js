@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  resetNotification,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -113,6 +114,22 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   try {
     const { data } = await axios.get(`/api/users/${searchTerm}`);
     dispatch(setSearchedUsers(data));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const sendReadReceipt = (body) => async (dispatch) => {
+  try {
+    const { conversationId, senderId } = body;
+    const { data } = await axios.patch(`/api/conversations/read/${senderId}`); //  update database first.
+    dispatch(resetNotification(conversationId)); // update my last read
+
+    // emit message-read to notify other user.
+    socket.emit("message-read", {
+      conversationId,
+      updatedMessages: data.messages,
+    });
   } catch (error) {
     console.error(error);
   }
